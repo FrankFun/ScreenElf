@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.xiangzi.screenelf.elf.ElfView;
+
 /**
  * Floating_windowActivity
  *
@@ -30,13 +32,13 @@ public class Floating_windowActivity extends Activity {
 
     public void go() {
         Intent show = new Intent(this, FloatingWindowService.class);
-        show.putExtra(PetElf.OPERATION, PetElf.OPERATION_SHOW);
+        show.putExtra(ElfView.OPERATION, ElfView.OPERATION_SHOW);
         startService(show);
     }
 
     public void dismiss() {
         Intent hide = new Intent(this, FloatingWindowService.class);
-        hide.putExtra(PetElf.OPERATION, PetElf.OPERATION_HIDE);
-        startService(hide);
+        hide.putExtra(ElfView.OPERATION, ElfView.OPERATION_HIDE);
+        stopService(hide);
     }
 }

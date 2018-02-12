@@ -1,4 +1,4 @@
-package com.xiangzi.screenelf;
+package com.xiangzi.screenelf.elf;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -7,8 +7,11 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.view.View;
 
+import com.xiangzi.screenelf.R;
+
 /**
  * LineView
+ * 弹跳线
  *
  * @author wuyongxiang
  *         2018/2/5
@@ -16,7 +19,9 @@ import android.view.View;
 
 public class LineView extends View {
 
-    PointF controlPoint, leftPoint, rightPoint;
+    PointF controlPoint,
+           leftPoint,
+           rightPoint;
     Paint paintArc = new Paint();
     Paint paintLine = new Paint();
     Path linePath = new Path();
@@ -54,6 +59,5 @@ public class LineView extends View {
         linePath.moveTo(leftPoint.x, leftPoint.y + 30);
         linePath.quadTo(controlPoint.x, controlPoint.y + 30, rightPoint.x, rightPoint.y + 30);
         canvas.drawPath(linePath, paintLine);
-
     }
 }
