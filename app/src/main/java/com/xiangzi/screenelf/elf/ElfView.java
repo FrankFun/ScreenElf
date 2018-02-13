@@ -21,7 +21,7 @@ import com.xiangzi.screenelf.R;
  * @author wuyongxiang
  *         2018/2/5
  */
-public class ElfView extends View {
+public class ElfView extends View implements View.OnTouchListener {
     final Point size = new Point();
     private int petW = 0;
     public static final String OPERATION = "operation";
@@ -39,6 +39,8 @@ public class ElfView extends View {
     private WindowManager wm;
     private WindowManager.LayoutParams params = new WindowManager.LayoutParams();
     private WindowManager.LayoutParams talkParams = new WindowManager.LayoutParams();
+    int lastX, lastY, dx, dy;
+    int paramX, paramY;
 
     public ElfView(Context context) {
         super(context);
@@ -49,55 +51,12 @@ public class ElfView extends View {
         tv_talk.setBackground(context.getDrawable(R.drawable.app_pref_bg));
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     public void Go() {
-        touch();
+        ((View) iv_elf).setOnTouchListener(this);
         mHandler.sendEmptyMessage(ElfView.TIMER_START);
         createBodyView();
         createTalkView();
-    }
-
-    private void touch() {
-        ((View) iv_elf).setOnTouchListener(new OnTouchListener() {
-            int lastX, lastY, dx, dy;
-            int paramX, paramY;
-            long downTime, upTime;
-
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        mHandler.sendEmptyMessage(ElfView.TIMER_STOP);
-                        downTime = System.currentTimeMillis();
-                        lastX = (int) event.getRawX();
-                        lastY = (int) event.getRawY();
-                        paramX = params.x;
-                        paramY = params.y;
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        HangUp();
-                        isPushing = true;
-                        dx = (int) event.getRawX() - lastX;
-                        dy = (int) event.getRawY() - lastY;
-                        params.x = paramX + dx;
-                        params.y = paramY + dy;
-                        wm.updateViewLayout(iv_elf, params);
-                        Talk("What do you want?");
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        isPushing = false;
-                        upTime = System.currentTimeMillis();
-                        if (Math.abs(event.getRawX() + event.getRawY() - lastX - lastY) < 40) {
-                            Talk("Hey, there");
-                            mHandler.sendEmptyMessageDelayed(TIMER_START, 2000);
-                        } else {
-                            mHandler.sendEmptyMessage(TIMER_START);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                return false;
-            }
-        });
     }
 
     private void setImageHWbyGifDrawable(ActionModel action) {
@@ -157,8 +116,6 @@ public class ElfView extends View {
 
     }
 
-    @SuppressWarnings("static-access")
-    @SuppressLint("NewApi")
     private void createBodyView() {
         params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
         params.format = PixelFormat.RGBA_8888; // 设置图片
@@ -174,7 +131,6 @@ public class ElfView extends View {
         wm.addView(iv_elf, params);
     }
 
-    @SuppressLint("NewApi")
     private void createTalkView() {
         talkParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
         talkParams.format = PixelFormat.RGBA_8888;
@@ -213,7 +169,6 @@ public class ElfView extends View {
                             mHandler.sendEmptyMessageDelayed(ElfView.TIMER_START, ActionManager.getInstance().getActions().get(i).getDuriation());
                             break;
                     }
-//                    mHandler.sendEmptyMessageDelayed(ElfView.TIMER_START, 5000 + (int) (Math.random() * 3000));
                     break;
                 case TIMER_STOP:
                     mHandler.removeMessages(ElfView.TIMER_START);
@@ -225,7 +180,7 @@ public class ElfView extends View {
                     params.x = params.x - (int) (Math.random() * 2 + 1);
                     wm.updateViewLayout(iv_elf, params);
                     Talk(ActionManager.getInstance().getActions().get(0).getWord().get(0));
-                    if (params.x - petW / 2 < (-400)) {
+                    if (params.x - petW / 2 < -400) {
                         WalkToRight();
                     } else {
                         mHandler.sendEmptyMessageDelayed(ElfView.RUN_LEFT, 50);
@@ -248,4 +203,38 @@ public class ElfView extends View {
         }
     };
 
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mHandler.sendEmptyMessage(ElfView.TIMER_STOP);
+                lastX = (int) event.getRawX();
+                lastY = (int) event.getRawY();
+                paramX = params.x;
+                paramY = params.y;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                HangUp();
+                isPushing = true;
+                dx = (int) event.getRawX() - lastX;
+                dy = (int) event.getRawY() - lastY;
+                params.x = paramX + dx;
+                params.y = paramY + dy;
+                wm.updateViewLayout(iv_elf, params);
+                Talk("What do you want?");
+                break;
+            case MotionEvent.ACTION_UP:
+                isPushing = false;
+                if (Math.abs(event.getRawX() + event.getRawY() - lastX - lastY) < 40) {
+                    Talk("Hey, there");
+                    mHandler.sendEmptyMessageDelayed(TIMER_START, 2000);
+                } else {
+                    mHandler.sendEmptyMessage(TIMER_START);
+                }
+                break;
+            default:
+                break;
+        }
+        return false;
+    }
 }
