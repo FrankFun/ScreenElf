@@ -80,6 +80,7 @@ public class ElfView extends View {
                         params.x = paramX + dx;
                         params.y = paramY + dy;
                         wm.updateViewLayout(iv_elf, params);
+                        Talk("What do you want?");
                         break;
                     case MotionEvent.ACTION_UP:
                         isPushing = false;
