@@ -1,12 +1,14 @@
 package com.xiangzi.screenelf.elf;
 
-
 import android.annotation.SuppressLint;
+import android.app.Instrumentation;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -19,7 +21,7 @@ import com.xiangzi.screenelf.R;
  * PetElf
  *
  * @author wuyongxiang
- *         2018/2/5
+ * 2018/2/5
  */
 public class ElfView extends View implements View.OnTouchListener {
     final Point size = new Point();
@@ -32,6 +34,10 @@ public class ElfView extends View implements View.OnTouchListener {
     public static final int TIMER_STOP = 1005;
     public static final int RUN_LEFT = 1006;
     public static final int RUN_RIGHT = 1007;
+    public static final int SECONDS = 1008;
+    public static final int TRI_SECONDS = 1009;
+
+    private Instrumentation mInstrumentation = new Instrumentation();
 
     private ImageView iv_elf;
     private TextView tv_talk;
@@ -41,14 +47,17 @@ public class ElfView extends View implements View.OnTouchListener {
     private WindowManager.LayoutParams talkParams = new WindowManager.LayoutParams();
     int lastX, lastY, dx, dy;
     int paramX, paramY;
+    private Context mContext;
 
     public ElfView(Context context) {
         super(context);
+        mContext = context;
         wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         if (wm != null) wm.getDefaultDisplay().getSize(size);
         iv_elf = new ImageView(context);
         tv_talk = new TextView(context);
         tv_talk.setBackground(context.getDrawable(R.drawable.app_pref_bg));
+        tv_talk.setTextColor(Color.BLACK);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -67,18 +76,15 @@ public class ElfView extends View implements View.OnTouchListener {
         wm.updateViewLayout(iv_elf, params);
     }
 
-
     public void WalkToLeft() {
         setImageHWbyGifDrawable(ActionManager.getInstance().getActions().get(0));
         mHandler.sendEmptyMessage(ElfView.RUN_LEFT);
-
     }
 
     public void WalkToRight() {
         setImageHWbyGifDrawable(ActionManager.getInstance().getActions().get(1));
         mHandler.sendEmptyMessage(ElfView.RUN_RIGHT);
     }
-
 
     public void HangUp() {
         if (!isPushing) {
@@ -113,7 +119,6 @@ public class ElfView extends View implements View.OnTouchListener {
         } else {
             tv_talk.setVisibility(GONE);
         }
-
     }
 
     private void createBodyView() {
@@ -197,11 +202,18 @@ public class ElfView extends View implements View.OnTouchListener {
                         mHandler.sendEmptyMessageDelayed(RUN_RIGHT, 50);
                     }
                     break;
+                case SECONDS:
+                    sendSeconds();
+                    break;
+                case TRI_SECONDS:
+                    sendTriSeconds();
+                    break;
                 default:
                     break;
             }
         }
     };
+    private boolean startClick = false;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -228,6 +240,15 @@ public class ElfView extends View implements View.OnTouchListener {
                 if (Math.abs(event.getRawX() + event.getRawY() - lastX - lastY) < 40) {
                     Talk("Hey, there");
                     mHandler.sendEmptyMessageDelayed(TIMER_START, 2000);
+                    if (startClick) {
+                        Talk("Stopping");
+                        mHandler.removeMessages(SECONDS);
+                        mHandler.removeMessages(TRI_SECONDS);
+                    } else {
+                        Talk("Starting");
+                        mHandler.sendEmptyMessage(SECONDS);
+                        mHandler.sendEmptyMessage(TRI_SECONDS);
+                    }
                 } else {
                     mHandler.sendEmptyMessage(TIMER_START);
                 }
@@ -236,5 +257,34 @@ public class ElfView extends View implements View.OnTouchListener {
                 break;
         }
         return false;
+    }
+
+    private void sendSeconds() {
+        mHandler.sendEmptyMessageDelayed(SECONDS, 1001);
+        new Thread(() -> {
+            try {
+
+                mInstrumentation.sendPointerSync(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
+                        MotionEvent.ACTION_DOWN, 200, 200, 0));
+                mInstrumentation.sendPointerSync(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
+                        MotionEvent.ACTION_UP, 200, 200, 0));
+            } catch (Exception ignored) {
+
+            }
+        }).start();
+    }
+
+    private void sendTriSeconds() {
+        mHandler.sendEmptyMessageDelayed(TRI_SECONDS, 3001);
+        new Thread(() -> {
+            try {
+                mInstrumentation.sendPointerSync(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
+                        MotionEvent.ACTION_DOWN, 200, 500, 0));
+                mInstrumentation.sendPointerSync(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
+                        MotionEvent.ACTION_UP, 200, 500, 0));
+            } catch (Exception ignored) {
+
+            }
+        }).start();
     }
 }

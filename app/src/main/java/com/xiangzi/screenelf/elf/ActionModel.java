@@ -20,37 +20,37 @@ public class ActionModel {
     private int height = 0;
     private int duriation = 8000;
 
-    public List<String> getWord() {
+    List<String> getWord() {
         return words;
     }
 
-    public void addWord(String word) {
+    void addWord(String word) {
         words.add(word);
     }
 
-    public GifDrawable getActionDrawable() {
+    GifDrawable getActionDrawable() {
         return actionDrawable;
     }
 
-    public void setActionDrawable(GifDrawable actionDrawable) {
+    void setActionDrawable(GifDrawable actionDrawable) {
         width = actionDrawable.getIntrinsicWidth();
         height = actionDrawable.getIntrinsicHeight();
         this.actionDrawable = actionDrawable;
     }
 
-    public int getWidth() {
+    int getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    int getHeight() {
         return height;
     }
 
-    public int getDuriation() {
+    int getDuriation() {
         return duriation;
     }
 
-    public void setDuriation(int duriation) {
+    void setDuriation(int duriation) {
         this.duriation = duriation;
     }
 }
