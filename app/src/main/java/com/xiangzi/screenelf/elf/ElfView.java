@@ -242,10 +242,12 @@ public class ElfView extends View implements View.OnTouchListener {
                     mHandler.sendEmptyMessageDelayed(TIMER_START, 2000);
                     if (startClick) {
                         Talk("Stopping");
+                        startClick = false;
                         mHandler.removeMessages(SECONDS);
                         mHandler.removeMessages(TRI_SECONDS);
                     } else {
                         Talk("Starting");
+                        startClick = true;
                         mHandler.sendEmptyMessage(SECONDS);
                         mHandler.sendEmptyMessage(TRI_SECONDS);
                     }
